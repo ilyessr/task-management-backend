@@ -35,14 +35,14 @@ npm install
 Create a `.env` file at the root of the project and configure the necessary variables:
 
 ```
-MONGO_URI=mongodb://localhost:27017/yourDatabase
-MONGO_USER=yourMongoUser
-MONGO_PASS=yourMongoPassword
-JWT_SECRET="votreSecretJWT"
+MONGO_DATABASE=task_management
+MONGO_USERNAME=yourMongoUser
+MONGO_PASSWORD=yourMongoPassword
+MONGO_HOST=localhost
+MONGO_PORT=27017
+JWT_SECRET=yourSecretKey
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
-
-
 
 ```
 

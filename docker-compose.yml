@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  app:
+    image: node:14
+    container_name: task_management_app
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: npm run start:dev
+    environment:
+      - MONGO_USERNAME=admin
+      - MONGO_PASSWORD=admin
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
+      - MONGO_DATABASE=task_management
+      - JWT_SECRET=DznGvdMnPN5rTwAV/IEHhKTgdZd7A8+bGXZ+sACDPMU=
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb
+      - redis
+
+  mongodb:
+    image: mongo:4.4
+    container_name: task_management_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+
+  redis:
+    image: redis:6.2
+    container_name: task_management_redis
+    ports:
+      - 6379:6379
+
+volumes:
+  mongo-data:

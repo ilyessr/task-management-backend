@@ -26,10 +26,9 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 
         return {
           uri,
-          useUnifiedTopology: true,
           authSource: 'admin',
-          user: configService.get<string>('MONGO_USER'),
-          pass: configService.get<string>('MONGO_PASS'),
+          user: configService.get<string>('MONGO_USERNAME'),
+          pass: configService.get<string>('MONGO_PASSWORD'),
         };
       },
     }),

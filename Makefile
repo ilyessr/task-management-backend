@@ -1,43 +1,57 @@
-# MongoDB Docker Management
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
 
-CONTAINER_NAME := mongodb
+# Docker Compose Management
+
+CONTAINER_NAME_MONGO := task_management_mongodb
+CONTAINER_NAME_REDIS := task_management_redis
 BACKUP_FILE := backup-$(shell date +"%Y%m%d-%H%M%S").gz
-MONGODB_USER := admin
-MONGODB_PASSWORD := admin
-
 ## Usage
 
-# To start the MongoDB container in detached mode:
-start:
-	docker-compose up -d
+# To install project dependencies:
+install:
+	npm install
 
-# To restart the MongoDB container (stop and recreate):
+# To start all containers in detached mode:
+start:
+	docker-compose up 
+
+# To start all containers in detached mode and rebuild images:
+start-build:
+	docker-compose up --build 
+
+# To restart all containers:
 restart:
-	docker-compose restart mongodb
+	docker-compose restart
 
 # To enter the MongoDB container's terminal:
-shell:
-	docker exec -it $(CONTAINER_NAME) bash
+mongo-shell:
+	docker exec -it $(CONTAINER_NAME_MONGO) bash
 
 # To connect to MongoDB terminal:
-connect:
-	docker exec -it $(CONTAINER_NAME) mongosh -u $(MONGODB_USER) -p $(MONGODB_PASSWORD) --authenticationDatabase admin $(MONGO_DATABASE)
-	
-# To stop the MongoDB container:
+mongo-connect:
+	docker exec -it $(CONTAINER_NAME_MONGO) mongo -u $(MONGO_USERNAME) -p $(MONGO_PASSWORD) --authenticationDatabase admin task_management
+# To enter the Redis container's terminal:
+redis-shell:
+	docker exec -it $(CONTAINER_NAME_REDIS) bash
+
+# To stop all containers:
 stop:
 	docker-compose stop
 
-# To remove the MongoDB container:
+# To remove all containers:
 remove:
-	docker-compose down
+	docker-compose down -v
 
 # To create a backup of MongoDB data:
 backup:
-	docker exec $(CONTAINER_NAME) mongodump --gzip --archive=/backup/$(BACKUP_FILE)
+	docker exec $(CONTAINER_NAME_MONGO) mongodump --gzip --archive=/backup/$(BACKUP_FILE)
 
 # To restore MongoDB data from a backup:
 restore:
-	docker exec -i $(CONTAINER_NAME) mongorestore --gzip --archive=/backup/$(BACKUP_FILE)
+	docker exec -i $(CONTAINER_NAME_MONGO) mongorestore --gzip --archive=/backup/$(BACKUP_FILE)
 
 # To clean up local MongoDB data (remove all data files):
 clean:

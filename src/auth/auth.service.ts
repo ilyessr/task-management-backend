@@ -14,7 +14,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly redisService: RedisService,
   ) {
-    this.redisClient = new Redis();
+    this.redisClient = this.redisService.getClient();
   }
 
   async login(loginDto: LoginDto) {

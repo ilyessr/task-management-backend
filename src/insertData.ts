@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 import { faker } from '@faker-js/faker';
 import { TaskSchema } from './schemas/task.schema';
 import { UserSchema } from './schemas/user.schema';
-
 import * as dotenv from 'dotenv';
+import * as bcrypt from 'bcrypt';
+
 dotenv.config();
 
 // Build the MongoDB URI
@@ -14,13 +15,14 @@ const UserModel = mongoose.model('User', UserSchema);
 
 const items = ['Low', 'Medium', 'High'];
 
-// Nettoyage des bases de données
+// Cleanup databases
 async function cleanupDatabases() {
   await TaskModel.deleteMany({});
   await UserModel.deleteMany({});
-  console.log('Nettoyage des bases de données réussi!');
+  console.log('🧹 Databases cleaned up successfully!');
 }
 
+// Create fake data
 async function createFakeData() {
   try {
     const users = await Promise.all(
@@ -28,7 +30,7 @@ async function createFakeData() {
         const user = new UserModel({
           name: faker.person.fullName(),
           email: faker.internet.email(),
-          password: faker.internet.password(),
+          password: await bcrypt.hash(faker.internet.password(), 10),
         });
         return user.save();
       }),
@@ -51,28 +53,54 @@ async function createFakeData() {
       ),
     );
 
-    console.log('Création de fausses données réussie!');
+    console.log('✨ Fake data created successfully!');
   } catch (error) {
-    console.error('Erreur lors de la création de données:', error);
+    console.error('❌ Error creating data:', error);
   }
 }
 
-// Orchestration du nettoyage et de la création de données
+// Create specific user
+async function createSpecificUser() {
+  try {
+    const existingUser = await UserModel.findOne({
+      email: 'test@test.fr',
+    }).exec();
+    if (existingUser) {
+      console.log('ℹ️ User already exists.');
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash('test', 10);
+    const user = new UserModel({
+      name: 'test',
+      email: 'test@test.fr',
+      password: hashedPassword,
+    });
+
+    await user.save();
+    console.log('✅ Specific user created successfully!');
+  } catch (error) {
+    console.error('❌ Error creating specific user:', error);
+  }
+}
+
+// Orchestration of cleanup and data creation
 async function main() {
   try {
-    // Assurez-vous que la connexion est établie avant de continuer
+    // Make sure the connection is established before proceeding
     await mongoose.connect(mongoURI);
-    console.log('Connecté à MongoDB');
+    console.log('🔗 Connected to MongoDB');
 
-    // Exécutez les opérations après la connexion
+    // Execute operations after connection
     await cleanupDatabases();
     await createFakeData();
+    await createSpecificUser();
   } catch (error) {
-    console.error('Erreur lors de la connexion ou du traitement:', error);
+    console.error('❌ Error during connection or processing:', error);
   } finally {
-    // Déconnectez-vous de MongoDB dans le bloc finally pour s'assurer que cela se fait même en cas d'erreur
+    // Disconnect from MongoDB in the finally block to ensure it happens even in case of error
     await mongoose.disconnect();
-    console.log('Déconnecté de MongoDB');
+    console.log('🔌 Disconnected from MongoDB');
   }
 }
 

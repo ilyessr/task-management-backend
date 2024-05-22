@@ -4,6 +4,7 @@ import { UserService } from '../users/users.service';
 import { LoginDto } from '../dto/login.dto';
 import Redis from 'ioredis';
 import { RedisService } from '@/redis/redis.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -19,8 +20,7 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.userService.findByEmail(loginDto.email);
-    console.log({ user });
-    if (!user || user.password !== loginDto.password) {
+    if (!user || !(await bcrypt.compare(loginDto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
 

@@ -18,7 +18,7 @@ This project is a backend task management application built using NestJS and Mon
 Clone the repository to your local machine using the following command:
 
 ```bash
-git clone [URL_OF_THE_REPOSITORY]
+git clone git@github.com:ilyessr/task-management-backend.git
 ```
 
 ### Step 2: Install Dependencies
@@ -26,7 +26,7 @@ git clone [URL_OF_THE_REPOSITORY]
 Navigate to the project directory and install the dependencies:
 
 ```bash
-cd [project-directory]
+cd task-management-backend
 make install
 ```
 
@@ -44,17 +44,9 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 ```
 
-### Step 4: Using Docker for MongoDB and Redis
+### Step 4: Using Docker for MongoDB, Redis, and Starting the Application
 
-To start MongoDB and Redis instances with Docker, run:
-
-```bash
-make start
-```
-
-### Step 5: Start the Application
-
-To start the application in development mode, use:
+To start MongoDB, Redis instances, and the application with Docker, run:
 
 ```bash
 make start

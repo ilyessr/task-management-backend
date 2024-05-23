@@ -3,12 +3,12 @@ import { faker } from '@faker-js/faker';
 import { TaskSchema } from './schemas/task.schema';
 import { UserSchema } from './schemas/user.schema';
 import * as dotenv from 'dotenv';
-import * as bcrypt from 'bcrypt';
-
+import * as bcrypt from 'bcryptjs';
 dotenv.config();
 
 // Build the MongoDB URI
 const mongoURI = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/task_management?authSource=admin`;
+
 // Initialize Models
 const TaskModel = mongoose.model('Task', TaskSchema);
 const UserModel = mongoose.model('User', UserSchema);
@@ -17,42 +17,52 @@ const items = ['Low', 'Medium', 'High'];
 
 // Cleanup databases
 async function cleanupDatabases() {
-  await TaskModel.deleteMany({});
-  await UserModel.deleteMany({});
-  console.log('🧹 Databases cleaned up successfully!');
+  try {
+    await TaskModel.deleteMany({});
+    await UserModel.deleteMany({});
+    console.log('Databases cleaned up successfully!');
+  } catch (error) {
+    console.error('❌ Error cleaning up databases:', error);
+  }
+}
+
+// Create fake users
+async function createFakeUsers(count) {
+  const users = [];
+  for (let i = 0; i < count; i++) {
+    const user = new UserModel({
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      password: bcrypt.hashSync(faker.internet.password(), 10),
+    });
+    users.push(await user.save());
+  }
+  return users;
+}
+
+// Create fake tasks for users
+async function createFakeTasks(users) {
+  for (const user of users) {
+    for (let i = 0; i < 4; i++) {
+      const randomItem = items[Math.floor(Math.random() * items.length)];
+      const task = new TaskModel({
+        title: faker.lorem.sentence(),
+        description: faker.lorem.paragraph(),
+        isCompleted: faker.datatype.boolean(),
+        dueDate: faker.date.future(),
+        priority: randomItem,
+        users: user._id,
+      });
+      await task.save();
+    }
+  }
 }
 
 // Create fake data
 async function createFakeData() {
   try {
-    const users = await Promise.all(
-      Array.from({ length: 5 }, async (_, i) => {
-        const user = new UserModel({
-          name: faker.person.fullName(),
-          email: faker.internet.email(),
-          password: await bcrypt.hash(faker.internet.password(), 10),
-        });
-        return user.save();
-      }),
-    );
-
-    const tasks = await Promise.all(
-      users.flatMap((user) =>
-        Array.from({ length: 4 }, async () => {
-          const randomItem = items[Math.floor(Math.random() * items.length)];
-          const task = new TaskModel({
-            title: faker.lorem.sentence(),
-            description: faker.lorem.paragraph(),
-            isCompleted: faker.datatype.boolean(),
-            dueDate: faker.date.future(),
-            priority: randomItem,
-            users: user._id,
-          });
-          return task.save();
-        }),
-      ),
-    );
-
+    const users = await createFakeUsers(5);
+    await createFakeTasks(users);
     console.log('✨ Fake data created successfully!');
   } catch (error) {
     console.error('❌ Error creating data:', error);
@@ -70,7 +80,8 @@ async function createSpecificUser() {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash('test', 10);
+    const password = 'test';
+    const hashedPassword = bcrypt.hashSync(password, 10);
     const user = new UserModel({
       name: 'test',
       email: 'test@test.fr',
@@ -87,20 +98,17 @@ async function createSpecificUser() {
 // Orchestration of cleanup and data creation
 async function main() {
   try {
-    // Make sure the connection is established before proceeding
     await mongoose.connect(mongoURI);
-    console.log('🔗 Connected to MongoDB');
+    console.log('Connected to MongoDB');
 
-    // Execute operations after connection
     await cleanupDatabases();
     await createFakeData();
     await createSpecificUser();
   } catch (error) {
     console.error('❌ Error during connection or processing:', error);
   } finally {
-    // Disconnect from MongoDB in the finally block to ensure it happens even in case of error
     await mongoose.disconnect();
-    console.log('🔌 Disconnected from MongoDB');
+    console.log('Disconnected from MongoDB');
   }
 }
 

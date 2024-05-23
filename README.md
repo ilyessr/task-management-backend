@@ -115,7 +115,9 @@ make start
 
 ## API Routes Overview
 
-### Task Routes
+### Authentication
+
+Before accessing other routes, you need to authenticate and obtain a JWT token.
 
 1. **Login**
 
@@ -124,27 +126,59 @@ make start
    - **Description:** Authenticates a user with the provided credentials.
    - **Body:** JSON object containing login credentials (email, password).
 
-2. **Create a Task**
+   Example Request Body:
+
+   ```json
+   {
+     "email": "test@test.fr",
+     "password": "test"
+   }
+   ```
+
+   Example Response:
+
+   ```json
+   {
+     "access_token": "your_jwt_token"
+   }
+   ```
+
+### Using Routes in Postman
+
+1. **Login to get the JWT token**:
+
+   - Send a POST request to `/auth/login` with the user's email and password.
+   - Copy the `access_token` from the response.
+
+2. **Include the JWT token in the Authorization header**:
+   - In Postman, go to the Headers tab.
+   - Add a new header:
+     - **Key:** `Authorization`
+     - **Value:** `Bearer your_jwt_token`
+
+### Task Routes
+
+1. **Create a Task**
 
    - **Method:** POST
    - **Endpoint:** `/tasks`
    - **Description:** Creates a new task with the provided data.
    - **Body:** JSON object containing task details (title, description, dueDate, priority).
 
-3. **Get All Tasks**
+2. **Get All Tasks**
 
    - **Method:** GET
    - **Endpoint:** `/tasks`
    - **Description:** Retrieves all tasks.
 
-4. **Get Task by ID**
+3. **Get Task by ID**
 
    - **Method:** GET
    - **Endpoint:** `/tasks/:id`
    - **Description:** Retrieves a task by its ID.
    - **Parameters:** `id` - The ID of the task.
 
-5. **Update a Task**
+4. **Update a Task**
 
    - **Method:** PUT
    - **Endpoint:** `/tasks/:id`
@@ -152,7 +186,7 @@ make start
    - **Parameters:** `id` - The ID of the task.
    - **Body:** JSON object containing the fields to update.
 
-6. **Delete a Task**
+5. **Delete a Task**
    - **Method:** DELETE
    - **Endpoint:** `/tasks/:id`
    - **Description:** Deletes the task with the specified ID.

@@ -2,12 +2,14 @@ version: '3.8'
 
 services:
   app:
-    image: node:18
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: task_management_app
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
-    command: sh -c "npm install && npx ts-node src/insertData.ts && npm run start:dev"
+    command: sh -c "npx ts-node src/insertData.ts && npm run start:dev"
     environment:
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}

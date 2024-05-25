@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../users/users.service';
-import { LoginDto } from '../dto/login.dto';
+import { LoginDto, RegisterDto } from '../dto/auth.dto';
 import Redis from 'ioredis';
 import { RedisService } from '@/redis/redis.service';
 import * as bcrypt from 'bcryptjs';
@@ -42,5 +42,14 @@ export class AuthService {
     await this.redisClient.set(`auth_${user.id}`, token, 'EX', 3600);
 
     return { access_token: token };
+  }
+
+  async register(registerDto: RegisterDto) {
+    const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
+    const user = await this.userService.create({
+      ...registerDto,
+      password: hashedPassword,
+    });
+    return user;
   }
 }

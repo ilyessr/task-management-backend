@@ -14,6 +14,7 @@ const TaskModel = mongoose.model('Task', TaskSchema);
 const UserModel = mongoose.model('User', UserSchema);
 
 const items = ['Low', 'Medium', 'High'];
+const categories = ['ToDo', 'InProgress', 'Done'];
 
 // Cleanup databases
 async function cleanupDatabases() {
@@ -44,13 +45,16 @@ async function createFakeUsers(count) {
 async function createFakeTasks(users) {
   for (const user of users) {
     for (let i = 0; i < 4; i++) {
-      const randomItem = items[Math.floor(Math.random() * items.length)];
+      const randomPriority = items[Math.floor(Math.random() * items.length)];
+      const randomCategory =
+        categories[Math.floor(Math.random() * categories.length)];
       const task = new TaskModel({
         title: faker.lorem.sentence(),
         description: faker.lorem.paragraph(),
         isCompleted: faker.datatype.boolean(),
         dueDate: faker.date.future(),
-        priority: randomItem,
+        priority: randomPriority,
+        category: randomCategory,
         users: user._id,
       });
       await task.save();

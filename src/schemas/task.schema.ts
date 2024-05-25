@@ -17,6 +17,12 @@ export enum TaskPriority {
   High = 'High',
 }
 
+export enum TaskCategory {
+  ToDo = 'To Do',
+  InProgress = 'In Progress',
+  Done = 'Done',
+}
+
 @Schema({ timestamps: true })
 export class Task extends Document {
   @IsString({ message: 'Title must be a string' })
@@ -50,6 +56,10 @@ export class Task extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   users?: User[];
+
+  @IsString({ message: 'Category must be a string' })
+  @Prop({ required: true, default: TaskCategory.ToDo })
+  category: string;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

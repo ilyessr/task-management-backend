@@ -1,10 +1,9 @@
-import { TaskPriority } from '@/schemas/task.schema';
+import { TaskPriority, TaskCategory } from '@/schemas/task.schema';
 import {
   IsString,
   IsOptional,
   IsDate,
   IsEnum,
-  isMongoId,
   IsMongoId,
 } from 'class-validator';
 
@@ -22,6 +21,9 @@ export class CreateTaskDto {
 
   @IsEnum(TaskPriority)
   priority: TaskPriority;
+
+  @IsEnum(TaskCategory)
+  category: TaskCategory;
 }
 
 export class UpdateTaskDto {
@@ -40,6 +42,10 @@ export class UpdateTaskDto {
   @IsEnum(TaskPriority)
   @IsOptional()
   priority?: TaskPriority;
+
+  @IsEnum(TaskCategory)
+  @IsOptional()
+  category?: TaskCategory;
 }
 
 export class FindTaskByTitleDto {
